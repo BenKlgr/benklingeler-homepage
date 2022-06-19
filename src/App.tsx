@@ -1,13 +1,11 @@
-import { ChakraProvider, extendTheme, Theme } from '@chakra-ui/react';
+import { ChakraProvider, extendTheme, Stack, Theme } from '@chakra-ui/react';
 import { useState } from 'react';
-import { PageContext } from './context/PageContext';
-import ContactPage from './pages/ContactPage';
-import MainPage from './pages/MainPage';
-import ProjectsPage from './pages/ProjectsPage';
+import { PageStateContext } from './context/PageStateContext';
+import ContactComponent from './pages/ContactComponent';
+import MainComponent from './pages/MainComponent';
+import ProjectsComponent from './pages/ProjectsComponent';
 
 function App() {
-  const [currentPage, setCurrentPage] = useState('main');
-
   const theme = extendTheme({
     config: {
       initialColorMode: 'dark',
@@ -19,13 +17,40 @@ function App() {
     },
   } as Theme);
 
+  const [projects, setProjects] = useState(false);
+  const [contact, setContact] = useState(false);
+
+  const setProjectsState = (newState: boolean) => {
+    setProjects(newState);
+    if (contact && newState) setContact(false);
+  };
+
+  const setContactState = (newState: boolean) => {
+    setContact(newState);
+    if (projects && newState) setProjects(false);
+  };
+
   return (
     <ChakraProvider theme={theme}>
-      <PageContext.Provider value={{ currentPage, setCurrentPage }}>
-        <MainPage open={currentPage == 'main'} />
-        <ProjectsPage open={currentPage == 'projects'} />
-        <ContactPage open={currentPage == 'contact'} />
-      </PageContext.Provider>
+      <PageStateContext.Provider
+        value={{
+          contact,
+          setContact: setContactState,
+          projects,
+          setProjects: setProjectsState,
+        }}>
+        <Stack
+          direction={'row'}
+          height={'100vh'}
+          width={'100%'}
+          spacing={6}
+          alignItems={'center'}
+          justifyContent={'center'}>
+          <ContactComponent />
+          <MainComponent />
+          <ProjectsComponent />
+        </Stack>
+      </PageStateContext.Provider>
     </ChakraProvider>
   );
 }
